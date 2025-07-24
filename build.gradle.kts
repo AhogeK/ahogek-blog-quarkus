@@ -22,6 +22,10 @@ dependencies {
     testImplementation("io.rest-assured:rest-assured")
 }
 
+configurations.all {
+    resolutionStrategy.force("org.apache.commons:commons-lang3:3.18.0")
+}
+
 group = "com.ahogek"
 version = "1.0.0-SNAPSHOT"
 
