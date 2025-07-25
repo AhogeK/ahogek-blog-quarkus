@@ -13,7 +13,7 @@ IMAGE=quarkus/ahogek-blog-quarkus
 echo "[3] 检查并删除同名容器(如有)"
 if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER}\$"; then
     echo "    正在停止并删除旧容器: ${CONTAINER}"
-    docker stop "${CONTAINER}" && docker rm "${CONTAINER}"
+    docker stop "${CONTAINER}"
 else
     echo "    没有同名旧容器，无需删除"
 fi
