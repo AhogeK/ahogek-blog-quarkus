@@ -1,8 +1,8 @@
 #!/bin/zsh
 set -e
 
-echo "[1] git pull"
-git pull
+echo "[1] git fetch --all && git reset --hard origin/master"
+git fetch --all && git reset --hard origin/master
 
 echo "[2] Gradle 原生构建"
 ./gradlew build -Dquarkus.native.enabled=true -Dquarkus.package.jar.enabled=false
