@@ -1,5 +1,6 @@
 package com.ahogek.blog;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.json.bind.Jsonb;
@@ -66,6 +67,7 @@ public class OnlineCounterSocket {
         }));
     }
 
+    @RegisterForReflection
     public static class UserCountMessage {
         private int count; // 1. 将字段设为 private
 
