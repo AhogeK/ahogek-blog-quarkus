@@ -1,5 +1,6 @@
 package com.ahogek.blog;
 
+import com.ahogek.blog.socket.OnlineCounterSocket;
 import io.quarkus.test.common.http.TestHTTPResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.json.bind.Jsonb;

@@ -1,4 +1,4 @@
-package com.ahogek.blog;
+package com.ahogek.blog.socket;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
