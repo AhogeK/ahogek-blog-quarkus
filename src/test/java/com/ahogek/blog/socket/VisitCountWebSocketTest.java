@@ -153,4 +153,33 @@ class VisitCountWebSocketTest {
             Assertions.assertTrue(json.containsKey("count"), "所有消息都应包含count字段");
         }
     }
+
+    @Test
+    void testMessageFormat() throws Exception {
+        CountDownLatch messageLatch = new CountDownLatch(1);
+        AtomicReference<String> rawMessage = new AtomicReference<>();
+
+        client.connect(uri.getPort(), uri.getHost(), uri.getPath())
+                .onSuccess(ws -> {
+                    ws.handler(buffer -> {
+                        String message = buffer.toString();
+                        rawMessage.set(message);
+                        messageLatch.countDown();
+                    });
+                });
+
+        Assertions.assertTrue(messageLatch.await(5, TimeUnit.SECONDS), "消息超时");
+
+        String message = rawMessage.get();
+        Assertions.assertNotNull(message, "应该收到消息");
+
+        // 验证JSON格式: {"count":数字}
+        Assertions.assertTrue(message.matches("\\{\"count\":-?\\d+}"),
+                "消息格式应该是 {\"count\":数字}，实际: " + message);
+
+        // 验证能正确解析为JSON
+        Assertions.assertDoesNotThrow(() -> {
+            new JsonObject(message);
+        }, "消息应该是有效的JSON");
+    }
 }
