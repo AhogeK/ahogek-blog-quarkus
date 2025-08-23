@@ -1,6 +1,6 @@
 package com.ahogek.blog.resource;
 
-import com.ahogek.blog.seervice.VisitCountService;
+import com.ahogek.blog.service.VisitCountService;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;

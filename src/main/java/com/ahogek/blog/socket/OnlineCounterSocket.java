@@ -18,8 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author AhogeK
  * @since 2025-07-24 07:55:23
  */
-@ServerEndpoint("/online")
 @ApplicationScoped
+@ServerEndpoint("/websocket/online")
 public class OnlineCounterSocket {
 
     private static final Logger LOGGER = Logger.getLogger(OnlineCounterSocket.class);

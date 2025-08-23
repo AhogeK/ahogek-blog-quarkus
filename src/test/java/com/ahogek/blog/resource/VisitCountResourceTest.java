@@ -1,4 +1,4 @@
-package com.ahogek.blog;
+package com.ahogek.blog.resource;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
  * @since 2025-08-21 14:52:45
  */
 @QuarkusTest
-class VisitCountServiceTest {
+class VisitCountResourceTest {
 
     @Test
     void testRedisOperations() {

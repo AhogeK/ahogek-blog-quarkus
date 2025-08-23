@@ -1,6 +1,5 @@
-package com.ahogek.blog;
+package com.ahogek.blog.socket;
 
-import com.ahogek.blog.socket.OnlineCounterSocket;
 import io.quarkus.test.common.http.TestHTTPResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.json.bind.Jsonb;
@@ -24,7 +23,7 @@ class OnlineCounterSocketTest {
     private static final LinkedBlockingDeque<String> MESSAGES = new LinkedBlockingDeque<>();
     private static final Logger LOGGER = Logger.getLogger(OnlineCounterSocketTest.class);
 
-    @TestHTTPResource("/online")
+    @TestHTTPResource("/websocket/online")
     URI uri;
 
     @Test
