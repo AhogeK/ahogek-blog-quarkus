@@ -14,6 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -58,10 +60,10 @@ class VisitCountWebSocketTest {
     }
 
     @Test
-    void testSingleConnection_ShouldReceiveMessage() throws Exception {
+    void testConnection_ShouldReceiveValidMessage() throws Exception {
+        CountDownLatch connectionLatch = new CountDownLatch(1);
         CountDownLatch messageLatch = new CountDownLatch(1);
         AtomicReference<JsonObject> receivedMessage = new AtomicReference<>();
-        CountDownLatch connectionLatch = new CountDownLatch(1);
 
         client.connect(uri.getPort(), uri.getHost(), uri.getPath())
                 .onSuccess(ws -> {
@@ -85,15 +87,70 @@ class VisitCountWebSocketTest {
                     connectionLatch.countDown();
                 });
 
-        // 等待连接建立
+        // 验证连接成功
         Assertions.assertTrue(connectionLatch.await(5, TimeUnit.SECONDS), "连接超时");
 
-        // 等待收到消息
+        // 验证收到消息
         Assertions.assertTrue(messageLatch.await(5, TimeUnit.SECONDS), "消息接收超时");
 
         // 验证消息格式
         JsonObject json = receivedMessage.get();
         Assertions.assertNotNull(json, "应该收到消息");
         Assertions.assertTrue(json.containsKey("count"), "消息应包含count字段");
+
+        // 只验证是有效数字，不关心具体值
+        Integer count = json.getInteger("count");
+        Assertions.assertNotNull(count, "count不能为null");
+        Assertions.assertTrue(count >= 0, "count应该是非负整数");
+    }
+
+    @Test
+    void testMultipleConnections_AllShouldReceiveMessages() throws Exception {
+        final int connectionCount = 3;
+        CountDownLatch allMessagesLatch = new CountDownLatch(connectionCount);
+        List<AtomicReference<JsonObject>> receivedMessages = new ArrayList<>();
+
+        for (int i = 0; i < connectionCount; i++) {
+            AtomicReference<JsonObject> receivedMessage = new AtomicReference<>();
+            receivedMessages.add(receivedMessage);
+
+            final int connectionIndex = i;
+
+            client.connect(uri.getPort(), uri.getHost(), uri.getPath())
+                    .onSuccess(ws -> {
+                        LOGGER.infof("连接 %d 建立成功", connectionIndex + 1);
+
+                        ws.handler(buffer -> {
+                            try {
+                                JsonObject json = new JsonObject(buffer.toString());
+                                LOGGER.infof("连接 %d 收到消息: %s", connectionIndex + 1, json);
+
+                                // 只记录第一条消息
+                                if (receivedMessage.compareAndSet(null, json)) {
+                                    allMessagesLatch.countDown();
+                                }
+                            } catch (Exception e) {
+                                LOGGER.error("连接 " + (connectionIndex + 1) + " 解析消息失败", e);
+                            }
+                        });
+                    })
+                    .onFailure(throwable -> {
+                        LOGGER.error("连接 " + (connectionIndex + 1) + " 失败", throwable);
+                        allMessagesLatch.countDown(); // 即使失败也要countdown，避免无限等待
+                    });
+
+            // 连接间隔
+            Thread.sleep(200);
+        }
+
+        // 等待所有连接都收到消息
+        Assertions.assertTrue(allMessagesLatch.await(10, TimeUnit.SECONDS), "部分连接未收到消息");
+
+        // 验证所有连接都收到了有效消息
+        for (int i = 0; i < receivedMessages.size(); i++) {
+            JsonObject json = receivedMessages.get(i).get();
+            Assertions.assertNotNull(json, String.format("连接 %d 应该收到消息", i + 1));
+            Assertions.assertTrue(json.containsKey("count"), "所有消息都应包含count字段");
+        }
     }
 }
