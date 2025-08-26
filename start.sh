@@ -30,4 +30,10 @@ echo "[5] 构建新镜像"
 docker build -f src/main/docker/Dockerfile.native -t "${IMAGE}" .
 
 echo "[6] 启动新容器"
-docker run --name "${CONTAINER}" -i --rm -d -p 8003:8080 "${IMAGE}"
+set -a
+source .env
+set +a
+docker run --name "${CONTAINER}" -i --rm -d -p 8003:8080 \
+  -e REDIS_HOSTS \
+  -e REDIS_PASSWORD \
+  "${IMAGE}"
